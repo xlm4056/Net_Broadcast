@@ -15,7 +15,8 @@ static short port = 1883;
 
 int send_msg()
 {
-	char data[] = "?";
+	char data[] = "This is the message!";
+	size_t data_len = sizeof(data);
 
 	int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sockfd < 0) {
@@ -27,21 +28,22 @@ int send_msg()
 	setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
 
 	struct sockaddr_in sendAddr;
-	size_t data_len = sizeof(data);
-
 	memset(&sendAddr, 0, sizeof(sendAddr));
 	sendAddr.sin_family = AF_INET;
 	sendAddr.sin_port = htons(port);
-	sendAddr.sin_addr.s_addr = htonl(0xffffffff);
+	sendAddr.sin_addr.s_addr = htonl(0xffffffff); /* 255.255.255.255 */
 
 	printf("sending [%i] \"%s\"\n", (int)data_len, data);
 
 	ssize_t result = sendto(sockfd, data, data_len, 0, (struct sockaddr *)&sendAddr, sizeof(sendAddr));
 
-	printf("result=%i, errno=%i %s\n", (int)result, errno, strerror(errno));
 	if ((ssize_t)data_len != result) {
-		/*		return -1; */
+		printf("error: send result=%i, errno=%i %s\n", (int)result, errno, strerror(errno));
+		return -1;
+	} else {
+		printf("send succeeded\n");
 	}
+	return 0;
 }
 
 
